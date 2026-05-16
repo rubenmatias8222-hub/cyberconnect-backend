@@ -35,7 +35,7 @@ class ContentUpload(BaseModel):
 # STORAGE (UPLOAD SYSTEM)
 # ---------------------------
 
-content_store: Dict[str, str] = {}
+content_store = {}
 
 # ---------------------------
 # ROUTES
@@ -67,12 +67,10 @@ def upload_content(data: ContentUpload):
         "message": "Content uploaded successfully!",
         "title": data.title
     }
-
 # ---------------------------
 # GET CONTENT (FRONTEND USE)
 # ---------------------------
 
 @app.get("/content")
 def get_content():
-
     return content_store
