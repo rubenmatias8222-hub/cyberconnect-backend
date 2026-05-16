@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-from typing import Dict
 
 app = FastAPI()
 
@@ -31,8 +30,9 @@ class ContactForm(BaseModel):
 class ContentUpload(BaseModel):
     title: str
     content: str
+
 # ---------------------------
-# STORAGE (UPLOAD SYSTEM)
+# STORAGE
 # ---------------------------
 
 content_store = {}
@@ -43,7 +43,9 @@ content_store = {}
 
 @app.get("/")
 def home():
-    return {"message": "CyberConnect backend running"}
+    return {
+        "message": "CyberConnect backend running"
+    }
 
 # CONTACT FORM
 @app.post("/contact")
@@ -52,12 +54,11 @@ def contact(form: ContactForm):
     print("New message received:")
     print(form)
 
-    return {"message": "Message sent successfully!"}
+    return {
+        "message": "Message sent successfully!"
+    }
 
-# ---------------------------
 # ADMIN UPLOAD SYSTEM
-# ---------------------------
-
 @app.post("/upload")
 def upload_content(data: ContentUpload):
 
@@ -67,10 +68,9 @@ def upload_content(data: ContentUpload):
         "message": "Content uploaded successfully!",
         "title": data.title
     }
-# ---------------------------
-# GET CONTENT (FRONTEND USE)
-# ---------------------------
 
+# GET CONTENT
 @app.get("/content")
 def get_content():
+
     return content_store
