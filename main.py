@@ -31,7 +31,6 @@ class ContactForm(BaseModel):
 class ContentUpload(BaseModel):
     title: str
     content: str
-
 # ---------------------------
 # STORAGE (UPLOAD SYSTEM)
 # ---------------------------
