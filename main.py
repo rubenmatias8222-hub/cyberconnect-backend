@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
+from typing import Dict
 
 app = FastAPI()
 
-# Allow frontend access
 origins = [
     "https://rubenmatias8222-hub.github.io",
     "http://localhost:5500"
@@ -18,11 +18,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Validation model
 class ContactForm(BaseModel):
     name: str
     email: EmailStr
     message: str
+
+# 🔥 Put globals here
+content_store: Dict[str, str] = {}
 
 @app.get("/")
 def home():
@@ -30,10 +32,7 @@ def home():
 
 @app.post("/contact")
 def contact(form: ContactForm):
-
     print("New message received:")
     print(form)
 
-    return {
-        "message": "Message sent successfully!"
-    }
+    return {"message": "Message sent successfully!"}
