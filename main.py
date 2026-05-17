@@ -35,7 +35,7 @@ class ContentUpload(BaseModel):
 # STORAGE
 # ---------------------------
 
-content_store = {}
+from app.data.store import content_store
 
 # ---------------------------
 # ROUTES
