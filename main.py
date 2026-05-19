@@ -1,18 +1,13 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
 app = FastAPI()
-from fastapi.middleware.cors import CORSMiddleware
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-# Allow frontend access
+# ---------------------------
+# CORS CONFIG
+# ---------------------------
 origins = [
     "https://rubenmatias8222-hub.github.io",
     "http://localhost:5500"
@@ -51,25 +46,19 @@ from app.data.store import content_store
 
 @app.get("/")
 def home():
-    return {
-        "message": "CyberConnect backend running"
-    }
+    return {"message": "CyberConnect backend running"}
 
 # CONTACT FORM
 @app.post("/contact")
 def contact(form: ContactForm):
-
     print("New message received:")
     print(form)
 
-    return {
-        "message": "Message sent successfully!"
-    }
+    return {"message": "Message sent successfully!"}
 
-# ADMIN UPLOAD SYSTEM
+# UPLOAD CONTENT
 @app.post("/upload")
 def upload_content(data: ContentUpload):
-
     content_store[data.title] = data.content
 
     return {
@@ -80,5 +69,4 @@ def upload_content(data: ContentUpload):
 # GET CONTENT
 @app.get("/content")
 def get_content():
-
     return content_store
