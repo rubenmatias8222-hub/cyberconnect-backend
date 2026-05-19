@@ -51,11 +51,15 @@ def home():
 # CONTACT FORM
 @app.post("/contact")
 def contact(form: ContactForm):
+
     print("New message received:")
     print(form)
 
-    return {"message": "Message sent successfully!"}
-
+    return {
+        "status": "success",
+        "user": form.name,
+        "received": True
+    }
 # UPLOAD CONTENT
 @app.post("/upload")
 def upload_content(data: ContentUpload):
