@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
+from sqlalchemy.orm import Session
 
 from app.database import Base, engine, SessionLocal
 from app.models import Message
@@ -31,6 +32,17 @@ app.add_middleware(
 )
 
 # ---------------------------
+# DEPENDENCY
+# ---------------------------
+# Yields a database session and guarantees it closes after the request finishes
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# ---------------------------
 # MODELS
 # ---------------------------
 class ContactForm(BaseModel):
@@ -51,9 +63,7 @@ def home():
 
 # CONTACT (SAVE)
 @app.post("/contact")
-def contact(form: ContactForm):
-    db = SessionLocal()
-
+def contact(form: ContactForm, db: Session = Depends(get_db)):
     new_message = Message(
         name=form.name,
         email=form.email,
@@ -62,7 +72,7 @@ def contact(form: ContactForm):
 
     db.add(new_message)
     db.commit()
-    db.close()
+    db.refresh(new_message) # Optional: updates new_message with its generated ID
 
     return {
         "status": "success",
@@ -73,12 +83,8 @@ def contact(form: ContactForm):
 
 # GET MESSAGES (ADMIN VIEW)
 @app.get("/messages")
-def get_messages():
-    db = SessionLocal()
-
+def get_messages(db: Session = Depends(get_db)):
     messages = db.query(Message).all()
-
-    db.close()
 
     return [
         {
