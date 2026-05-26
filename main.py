@@ -1,12 +1,21 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
-app = FastAPI()
+from app.database import Base, engine, SessionLocal
+from app.models import Message
+from app.data.store import content_store
 
 # ---------------------------
-# CORS CONFIG
+# INIT APP
+# ---------------------------
+app = FastAPI()
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
+
+# ---------------------------
+# CORS
 # ---------------------------
 origins = [
     "https://rubenmatias8222-hub.github.io",
@@ -24,7 +33,6 @@ app.add_middleware(
 # ---------------------------
 # MODELS
 # ---------------------------
-
 class ContactForm(BaseModel):
     name: str
     email: EmailStr
@@ -35,42 +43,49 @@ class ContentUpload(BaseModel):
     content: str
 
 # ---------------------------
-# STORAGE
-# ---------------------------
-
-from app.data.store import content_store
-
-# ---------------------------
 # ROUTES
 # ---------------------------
-
 @app.get("/")
 def home():
     return {"message": "CyberConnect backend running"}
 
-# CONTACT FORM
+# CONTACT (SAVE)
 @app.post("/contact")
 def contact(form: ContactForm):
+    db = SessionLocal()
 
-    print("New message received:")
-    print(form)
+    new_message = Message(
+        name=form.name,
+        email=form.email,
+        message=form.message
+    )
+
+    db.add(new_message)
+    db.commit()
+    db.close()
 
     return {
         "status": "success",
         "user": form.name,
-        "received": True
-    }
-# UPLOAD CONTENT
-@app.post("/upload")
-def upload_content(data: ContentUpload):
-    content_store[data.title] = data.content
-
-    return {
-        "message": "Content uploaded successfully!",
-        "title": data.title
+        "received": True,
+        "message": "Saved to database"
     }
 
-# GET CONTENT
-@app.get("/content")
-def get_content():
-    return content_store
+# GET MESSAGES (ADMIN VIEW)
+@app.get("/messages")
+def get_messages():
+    db = SessionLocal()
+
+    messages = db.query(Message).all()
+
+    db.close()
+
+    return [
+        {
+            "id": m.id,
+            "name": m.name,
+            "email": m.email,
+            "message": m.message
+        }
+        for m in messages
+    ]
