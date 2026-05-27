@@ -83,8 +83,12 @@ def contact(form: ContactForm, db: Session = Depends(get_db)):
 
 # GET MESSAGES (ADMIN VIEW)
 @app.get("/messages")
-def get_messages(db: Session = Depends(get_db)):
+def get_messages():
+    db = SessionLocal()
+
     messages = db.query(Message).all()
+
+    db.close()
 
     return [
         {
