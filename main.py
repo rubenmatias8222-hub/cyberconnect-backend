@@ -12,7 +12,6 @@ from app.data.store import content_store
 # ---------------------------
 app = FastAPI()
 
-# Create database tables
 Base.metadata.create_all(bind=engine)
 
 # ---------------------------
@@ -32,9 +31,8 @@ app.add_middleware(
 )
 
 # ---------------------------
-# DEPENDENCY
+# DB DEPENDENCY
 # ---------------------------
-# Yields a database session and guarantees it closes after the request finishes
 def get_db():
     db = SessionLocal()
     try:
@@ -61,7 +59,7 @@ class ContentUpload(BaseModel):
 def home():
     return {"message": "CyberConnect backend running"}
 
-# CONTACT (SAVE)
+# SAVE MESSAGE
 @app.post("/contact")
 def contact(form: ContactForm, db: Session = Depends(get_db)):
     new_message = Message(
@@ -72,23 +70,17 @@ def contact(form: ContactForm, db: Session = Depends(get_db)):
 
     db.add(new_message)
     db.commit()
-    db.refresh(new_message) # Optional: updates new_message with its generated ID
+    db.refresh(new_message)
 
     return {
         "status": "success",
-        "user": form.name,
-        "received": True,
         "message": "Saved to database"
     }
 
-# GET MESSAGES (ADMIN VIEW)
+# GET MESSAGES (ADMIN DASHBOARD)
 @app.get("/messages")
-def get_messages():
-    db = SessionLocal()
-
+def get_messages(db: Session = Depends(get_db)):
     messages = db.query(Message).all()
-
-    db.close()
 
     return [
         {
@@ -99,3 +91,8 @@ def get_messages():
         }
         for m in messages
     ]
+
+# CONTENT STORE (optional)
+@app.get("/content")
+def get_content():
+    return content_store
